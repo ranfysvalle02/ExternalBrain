@@ -8,6 +8,12 @@ External Brain is a tool for asserting facts or writing down your thoughts, stor
 * Facts get grouped into fact chunks and vectorized by a text embedder
 * Questions to the External Brain will retrieve facts before answering, grouding the response with your own facts!
 
+## Why You Need This:
+
+- **Never Forget a Detail**: Keep important ideas and notes at your fingertips.
+- **Unlock Hidden Connections**: Discover patterns and insights you might have overlooked.
+- **Supercharge Your Research**: Find relevant supporting information quickly.
+
 ## Compatibility
 
 External Brain's fact and chunk storage runs on MongDB Atlas, you can test it on a free tier (m0) account here:  https://www.mongodb.com/cloud/atlas/register
