@@ -69,12 +69,6 @@ docker run -d -p 7861:5000 extbrain
 
 External Brain was designed around using llama.cpp in server mode for the LLM, however it can now be run with OpenAI or Mistral.ai keys! Check out the sample.env file for configuration options.
 
-[extBrain - Hackathon Video](https://youtu.be/JJk5hY6gI1w)
-
-![ExternalBrain UI Screenshot](images/question.png)
-![ExternalBrain Facts](images/facts.png)
-![ExternalBrain Search](images/search.png)
-
 ## Configuration
 
 Copy the sample.env file to .env and edit this file.  This contains all the important configuration variables for the application to run.
@@ -167,3 +161,11 @@ For CPU only:
 ```
 
 Replace <model> with whatever model you downloaded and put into the llama.cpp/models directory
+
+## DEMO
+
+[extBrain - Hackathon Video](https://youtu.be/JJk5hY6gI1w)
+
+![ExternalBrain UI Screenshot](images/question.png)
+![ExternalBrain Facts](images/facts.png)
+![ExternalBrain Search](images/search.png)
