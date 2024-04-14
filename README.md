@@ -117,6 +117,20 @@ Install and configure https://github.com/patw/BreadVec
 
 Detailed instructions are in that repo.
 
+## IMPORTANT! VECTOR SEARCH INDEX MUST EXIST!
+```
+{
+  "fields": [
+    {
+      "type": "vector",
+      "path": "chunk_embedding",
+      "numDimensions": 1024,
+      "similarity": "cosine"
+    }
+  ]
+}
+```
+
 ## Downloading an LLM model
 
 We highly recommend OpenHermes 2.5 Mistral-7b fine tune for this task, as it's currently the best (Feb 2024) that
