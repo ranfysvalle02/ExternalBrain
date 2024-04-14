@@ -14,7 +14,9 @@ External Brain is a tool for asserting facts or writing down your thoughts, stor
 - **Unlock Hidden Connections**: Discover patterns and insights you might have overlooked.
 - **Supercharge Your Research**: Find relevant supporting information quickly.
 
-## **Compatibility**
+Let's look at how you can set up this system to start reaping these benefits.
+
+## **Setup**
 
 External Brain's fact and chunk storage operates on MongoDB Atlas. You can test it on a free tier (m0) account [here](https://www.mongodb.com/cloud/atlas/register).
 
