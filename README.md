@@ -119,6 +119,7 @@ Detailed instructions are in that repo.
 
 #### 🚨 IMPORTANT 🚨 
 ##### VECTOR SEARCH INDEX MUST EXIST!
+![Vector Search Creation](images/breadvec-default-vs-index.png)
 ```
 {
   "fields": [
