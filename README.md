@@ -117,7 +117,7 @@ Install and configure https://github.com/patw/BreadVec
 
 Detailed instructions are in that repo.
 
-## IMPORTANT! VECTOR SEARCH INDEX MUST EXIST!
+#### IMPORTANT! VECTOR SEARCH INDEX MUST EXIST!
 ```
 {
   "fields": [
