@@ -39,16 +39,6 @@ External Brain's fact and chunk storage operates on MongoDB Atlas. You can test 
    - **LLM Input:** Feed the retrieved chunks (along with the original question) into your LLM (e.g., OpenAI, Mistral.ai, or a locally run llama.cpp instance).
    - **Answer Generation:** The LLM will process the information to generate a comprehensive answer, grounded in the facts stored within your MongoDB Atlas database.
 
-## LLM Configuration
-
-External Brain was designed around using llama.cpp in server mode for the LLM, however it can now be run with OpenAI or Mistral.ai keys! Check out the sample.env file for configuration options.
-
-[extBrain - Hackathon Video](https://youtu.be/JJk5hY6gI1w)
-
-![ExternalBrain UI Screenshot](images/question.png)
-![ExternalBrain Facts](images/facts.png)
-![ExternalBrain Search](images/search.png)
-
 ## Basic Installation
 
 Create a dedicated cluster on MongDB Atlas (7.x or higher), Under Database Access add a database user in Password mode, with the built in role of "read/write any database".  Click on Network Access and add your personal IP or 0.0.0.0 if you're comfortable with any IP connecting to this cluster.
@@ -74,6 +64,16 @@ cd ExternalBrain
 docker build -t extbrain .
 docker run -d -p 7861:5000 extbrain
 ```
+
+## LLM Configuration
+
+External Brain was designed around using llama.cpp in server mode for the LLM, however it can now be run with OpenAI or Mistral.ai keys! Check out the sample.env file for configuration options.
+
+[extBrain - Hackathon Video](https://youtu.be/JJk5hY6gI1w)
+
+![ExternalBrain UI Screenshot](images/question.png)
+![ExternalBrain Facts](images/facts.png)
+![ExternalBrain Search](images/search.png)
 
 ## Configuration
 
