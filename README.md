@@ -12,6 +12,27 @@ External Brain is a tool for asserting facts or writing down your thoughts, stor
 
 External Brain's fact and chunk storage runs on MongDB Atlas, you can test it on a free tier (m0) account here:  https://www.mongodb.com/cloud/atlas/register
 
+**RAG Architecture on MongoDB Atlas**
+
+1. **Data Storage (Documents and Chunks):**
+   * **Documents:**  Represent the original source documents you want to store facts from.  
+   * **Chunks:** Smaller, manageable segments of the documents created during preprocessing (more on this below). Each chunk is treated as an individual MongoDB document.
+   * **Chunk Embeddings:** Use a text embedder (like BreadVec) to generate vector representations of each chunk. Store these embeddings directly in the chunk documents.
+
+2. **Vector Search Index:** 
+   * Create a MongoDB Atlas Search index specifically on the chunk embedding field. This will enable fast semantic similarity search during retrieval.
+
+3. **Retrieval (When a user asks a question):**
+   * **Question Embedding:**  Generate a vector embedding of the user's question using the same text embedder.
+   * **Semantic Search:** Use MongoDB Atlas's vector search capabilities to retrieve the most semantically relevant chunks from your database based on the question embedding.
+   * **Relevance Filtering:** You may apply additional filtering or ranking to the retrieved chunks based on metadata or calculated relevance scores to ensure the best chunks are used for answer generation.
+
+4. **Generation (LLM Usage):**
+   * **LLM Input:** Feed the retrieved chunks (along with the original question) into your LLM (e.g., OpenAI, Mistral.ai, or a locally run llama.cpp instance).
+   * **Answer Generation:** The LLM will process the information to generate a comprehensive answer, grounded in the facts stored within your MongoDB Atlas database.
+
+## LLM Configuration
+
 External Brain was designed around using llama.cpp in server mode for the LLM, however it can now be run with OpenAI or Mistral.ai keys! Check out the sample.env file for configuration options.
 
 [extBrain - Hackathon Video](https://youtu.be/JJk5hY6gI1w)
