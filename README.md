@@ -120,18 +120,6 @@ Detailed instructions are in that repo.
 #### 🚨 IMPORTANT 🚨 
 ##### VECTOR SEARCH INDEX MUST EXIST!
 ![Vector Search Creation](images/breadvec-default-vs-index.png)
-```
-{
-  "fields": [
-    {
-      "type": "vector",
-      "path": "chunk_embedding",
-      "numDimensions": 1024,
-      "similarity": "cosine"
-    }
-  ]
-}
-```
 
 ## Downloading an LLM model
 
