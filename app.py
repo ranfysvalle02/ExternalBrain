@@ -76,6 +76,7 @@ DEFAULT_TEMPERATURE = 0.7
 DEFAULT_LIMIT = 3
 DEFAULT_CANDIDATES = 100
 DEFAULT_FACTS_PER_PAGE = 25
+DEFAULT_TEXT_SCORE_CUT = 3.0 # This is a hack, reranking is better!
 
 ## Controls the fact synthesis 
 FACT_SYSTEM_MESSAGE = "You are sumbot, you take articles, blog posts and social media posts and you summarize the content from these into facts.  Each fact should be a single line and you think very carefully about what facts are important to the source material.  You capture enough facts in each article that it could be reproduced later using just the facts you provide.  You are expert level at this task and never miss a fact."
@@ -178,6 +179,7 @@ class QuestionForm(FlaskForm):
     question = StringField('Question 💬', validators=[DataRequired()])
     submit = SubmitField('Submit')
     rag = SelectField('Generation Type', choices=[("augmented", "Augmented (Facts)"), ("freeform", "Freeform")])
+    hybrid = SelectField('Hybrid Search', choices=[("hybrid", "Vector + Lexical"), ("vector", "Vector Only")])
     temperature = FloatField('LLM Temperature', default=DEFAULT_TEMPERATURE, validators=[DataRequired()])
     candidates = IntegerField('Vector Candidates', default=DEFAULT_CANDIDATES, validators=[DataRequired()])
     limit = IntegerField('Chunks', default=DEFAULT_LIMIT, validators=[DataRequired()])
@@ -308,15 +310,22 @@ def llm(user_prompt, system_message, temperature=DEFAULT_TEMPERATURE):
 
 
 # Chat with model with or without augmentation
-def chat(prompt, system_message, augmented=True, temperature=DEFAULT_TEMPERATURE, candidates=DEFAULT_CANDIDATES, limit=DEFAULT_LIMIT, score_cut=DEFAULT_SCORE_CUT):
+def chat(prompt, system_message, augmented=True, temperature=DEFAULT_TEMPERATURE, candidates=DEFAULT_CANDIDATES, limit=DEFAULT_LIMIT, score_cut=DEFAULT_SCORE_CUT, hybrid=True, text_score_cut=DEFAULT_TEXT_SCORE_CUT):
     # If we're doing RAG, vector search, assemble chunks and query with them
     fact_chunks = []
     chunk_string = ""
     if augmented:
         chunks = search_chunks(prompt, candidates, limit, score_cut)
+        # Vector search chunks
         for chunk in chunks:
             fact_chunks.append(chunk["fact_chunk"])
             chunk_string += chunk["fact_chunk"]
+        # Text search chunks if hybrid is enabled
+        if hybrid:
+            lexical_chunks = search_chunks_text(prompt, limit, text_score_cut)
+            for chunk in lexical_chunks:
+                fact_chunks.append(chunk["fact_chunk"])
+                chunk_string += chunk["fact_chunk"]
         # The most important guardrail for any LLM app:  Don't answer the question if there's no chunks!
         if chunk_string != "":
             llm_prompt = F"Facts:\n{chunk_string}\nAnswer this question using only the relevant facts above: {prompt}"
@@ -344,8 +353,7 @@ def store_dontknow(prompt):
     dt = datetime.datetime.now()
     col.insert_one({"date": dt, "prompt": prompt })
 
-# Get chunks based on semantic search (FIX THIS!!)
-# Just returns all chunks right now...
+# Get chunks based on semantic search
 def search_chunks(prompt, candidates, limit, score_cut):
     # Get the embedding for the prompt first
     vector = embed(prompt)
@@ -377,6 +385,40 @@ def search_chunks(prompt, candidates, limit, score_cut):
     # Connect to chunks, run query, return results
     col = db["chunks"]
     chunk_records = col.aggregate(vector_search_agg)
+    # Return this as a list instead of a cursor
+    return chunk_records
+
+# Get chunks based on text search 
+def search_chunks_text(prompt, limit, text_score_cut):
+    # Build the Atlas vector search aggregation
+    text_search_agg = [
+        {   
+            "$search": {
+                "text": {
+                    "path": "fact_chunk",
+                    "query": prompt
+                }
+            }   
+        },
+        {
+            "$limit": limit
+        },
+        {
+            "$project": {
+                "fact_chunk": 1,
+                "score": {"$meta": "searchScore"}
+            }
+        },
+        {
+            "$match": {
+                "score": { "$gte": text_score_cut }
+            }
+        }
+    ]
+
+    # Connect to chunks, run query, return results
+    col = db["chunks"]
+    chunk_records = col.aggregate(text_search_agg)
     # Return this as a list instead of a cursor
     return chunk_records
 
@@ -455,6 +497,8 @@ def chunk_by_context(chunk_limit, force=False):
     
     # Regenerate all chunks or just the changed facts
     if force:
+        # Nuke all the existing facts
+        chunks_col.delete_many({})
         facts = facts_col.find()
     else:
         facts = facts_col.find({"chunked": {'$ne': True}})
@@ -529,10 +573,15 @@ def index():
         form_result = request.form.to_dict(flat=True)
         q = form_result["question"]
 
-        if form_result["rag"] == "augmented":
-            llm_result = chat(q, DEFAULT_SYSTEM_MESSAGE, True, float(form_result["temperature"]), int(form_result["candidates"]), int(form_result["limit"]), float(form_result["score_cut"]))
+        if form_result["hybrid"] == "hybrid":
+            hybrid = True
         else:
-            llm_result = chat(q, DEFAULT_SYSTEM_MESSAGE, False, float(form_result["temperature"]), int(form_result["candidates"]), int(form_result["limit"]), float(form_result["score_cut"]))
+            hybrid = False
+
+        if form_result["rag"] == "augmented":
+            llm_result = chat(q, DEFAULT_SYSTEM_MESSAGE, True, float(form_result["temperature"]), int(form_result["candidates"]), int(form_result["limit"]), float(form_result["score_cut"]), hybrid)
+        else:
+            llm_result = chat(q, DEFAULT_SYSTEM_MESSAGE, False, float(form_result["temperature"]), int(form_result["candidates"]), int(form_result["limit"]), float(form_result["score_cut"]), hybrid)
                                     
         # Format with Misaka
         formatted_result = misaka.html(llm_result["completion"])
